@@ -1,0 +1,34 @@
+REPORTE DE CERTIFICADOS
+==============================
+Total de graduandos: 5
+
+Cedula: 123
+Nombre: maximo saravia
+Programa: curso
+Promedio: 10.0
+Estatus: APROBADO
+------------------------------
+Cedula: 987
+Nombre: juan jose
+Programa: curso
+Promedio: 10.0
+Estatus: APROBADO
+------------------------------
+Cedula: 261
+Nombre: marcelo alejandro
+Programa: bootcamp
+Promedio: 15.67
+Estatus: APROBADO
+------------------------------
+Cedula: 26112
+Nombre: anne jeria
+Programa: diplomado
+Promedio: 15.0
+Estatus: APROBADO
+------------------------------
+Cedula: 26112666
+Nombre: Joan Garcia
+Programa: curso
+Promedio: 12.5
+Estatus: APROBADO
+------------------------------

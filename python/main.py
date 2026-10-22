@@ -89,19 +89,127 @@ class SistemaAcademico:
         self.profesores = []
         self.pila_notas = []
         self.cola_certificados = []
+   
     def registrar_alumno(self, alumno):
         self.alumnos.append(alumno)
 
+    
+    def cargar_alumnos_txt(self):
+        try:
+            with open("alumnos.txt", "r", encoding="utf-8") as archivo:
+                for linea in archivo:
+                    datos = linea.strip().split(",")
+
+                    if len(datos) != 7:
+                        continue
+
+                    cedula, nombre, correo, tipo_programa = datos[:4]
+
+                    notas = []
+                    for nota in datos[4:7]:
+                        valor = float(nota)
+                        if valor != 0:
+                            notas.append(valor)
+
+                    tipo = tipo_programa.strip().lower()
+
+                    if tipo == "curso":
+                        programa = Curso(tipo_programa)
+                    elif tipo == "diplomado":
+                        programa = Diplomado(tipo_programa)
+                    elif tipo == "bootcamp":
+                        programa = Bootcamp(tipo_programa)
+                    else:
+                        continue
+
+                    alumno = Alumno(
+                        cedula, nombre, correo, notas, programa
+                    )
+                    self.alumnos.append(alumno)
+
+        except FileNotFoundError:
+            pass
+
+
+    def guardar_alumno_txt(self, alumno):
+        archivo = open("alumnos.txt", "a")
+        archivo.write(alumno.cedula + "," + alumno.nombre_completo + "," + alumno.correo + "," + alumno.nombre_programa + ",0,0,0\n")
+        archivo.close()
+
+    def actualizar_alumnos_txt(self):
+        archivo = open("alumnos.txt", "w")
+
+        for alumno in self.alumnos:
+            notas = alumno.notas[:3]
+
+            while len(notas) < 3:
+                notas.append(0)
+
+            archivo.write(
+                alumno.cedula + "," +
+                alumno.nombre_completo + "," +
+                alumno.correo + "," +
+                alumno.nombre_programa + "," +
+                str(notas[0]) + "," +
+                str(notas[1]) + "," +
+                str(notas[2]) + "\n"
+            )
+
+        archivo.close()
+   
+    def buscar_alumno(self, cedula):
+        for alumno in self.alumnos:
+            if alumno.cedula == cedula:
+                return alumno
+        return None
+
     def registrar_profesor(self, profesor):
         self.profesores.append(profesor)
+        
+    def buscar_profesor(self, cedula):
+        for profesor in self.profesores:
+            if profesor.cedula == cedula:
+                return profesor
+        return None
 
-    def registrar_nota(self, nota):
-        self.pila_notas.append(nota)
+    
+    def cargar_profesores_txt(self):
+        try:
+            with open("profesores.txt", "r", encoding="utf-8") as archivo:
+                for linea in archivo:
+                    datos = linea.strip().split(",")
+
+                    if len(datos) != 5:
+                        continue
+
+                    cedula, nombre, correo, especialidad, materia = datos
+
+                    profesor = Profesor(
+                        cedula, nombre, correo, especialidad, materia
+                    )
+
+                    self.profesores.append(profesor)
+
+        except FileNotFoundError:
+            pass
+
+
+    def guardar_profesor_txt(self, profesor):
+        archivo = open("profesores.txt", "a", encoding="utf-8")
+        archivo.write(profesor.cedula + "," + profesor.nombre_completo + "," + profesor.correo + "," + profesor.especialidad + "," + profesor.materia_asignada + "\n")
+        archivo.close()
+
+    def registrar_nota(self, alumno, nota):
+        self.pila_notas.append((alumno, nota))
 
     def deshacer_ultima_nota(self):
         if len(self.pila_notas) == 0:
-            return None
-        return self.pila_notas.pop()
+         return None
+
+        alumno, nota = self.pila_notas.pop()
+        alumno.notas.remove(nota)
+
+        return nota    
 
     def revisar_aprobados(self):
         aprobados = []
@@ -111,20 +219,51 @@ class SistemaAcademico:
         return aprobados
 
     def generar_certificados(self):
+        self.cola_certificados = []
         aprobados = self.revisar_aprobados()
+
         for alumno in aprobados:
-            certificado = "Certificado de aprobación - " + alumno.nombre_completo
-            self.cola_certificados.append(certificado)            
+            self.cola_certificados.append(alumno)
+
         return self.cola_certificados
+
     
+    def guardar_certificados_txt(self):
+        with open("certificados_pendientes.txt", "w", encoding="utf-8") as archivo:
+            archivo.write("REPORTE DE CERTIFICADOS\n")
+            archivo.write("==============================\n")
+            archivo.write("Total de graduandos: " + str(len(self.cola_certificados)) + "\n\n")
+
+            for alumno in self.cola_certificados:
+                archivo.write("Cedula: " + alumno.cedula + "\n")
+                archivo.write("Nombre: " + alumno.nombre_completo + "\n")
+                archivo.write("Programa: " + alumno.nombre_programa + "\n")
+                archivo.write("Promedio: " + str(round(alumno.calcular_promedio(), 2)) + "\n")
+                archivo.write("Estatus: APROBADO\n")
+                archivo.write("------------------------------\n")
+
+    
+ 
     def mostrar_reporte(self):
         print("=== REPORTE ACADEMICO ===")
-        print("ALUMNOS:")
+
+        print("\nALUMNOS:")
         for alumno in self.alumnos:
             alumno.mostrar_datos()
-        print("PROFESORES:")
+            print("Promedio:", round(alumno.calcular_promedio(), 2))
+
+            if alumno.esta_aprobado():
+                print("Estatus: APROBADO")
+            else:
+                print("Estatus: REPROBADO")
+
+            print("------------------------------")
+
+        print("\nPROFESORES:")
         for profesor in self.profesores:
             profesor.mostrar_datos()
+            print("------------------------------")
+
 
     def guardar_datos_txt(self):
         archivo = open("datos.txt", "w")
@@ -151,45 +290,124 @@ class SistemaAcademico:
         archivo.close()
         return self.alumnos
     
+    
     def salir(self):
+        self.actualizar_alumnos_txt()
         print("Saliendo del Sistema Académico...")
         return
 
-profesor1 = Profesor("P-101", "Mario Castañeda", "mariocastañeda@gmail.com", "programacion", "python")
-profesor1.mostrar_datos()
 
-diplomado1 = Diplomado("Programacion")
-alumno1 = Alumno("A-101", "Peter Parker", "peterparker@gmail.com", [], diplomado1)
-alumno1.registrar_nota(15)
-alumno1.registrar_nota(14)
-alumno1.registrar_nota(16)
-alumno1.mostrar_datos()
-print("promedio:", alumno1.calcular_promedio())
-print("aprobado:", alumno1.esta_aprobado())
-curso1 = Curso("Curso de python")
-print("curso aprobado:", curso1.evaluar_aprobacion([12, 11, 10]))
-diplomado_prueba = Diplomado("Diplomado de Python")
-print("diplomado aprobado:", diplomado_prueba.evaluar_aprobacion([15, 14, 16]))
-bootcamp1 = Bootcamp("Bootcamp de Python")
-print("bootcamp aprobado:", bootcamp1.evaluar_aprobacion([15, 14, 16]))
+def mostrar_menu():
+    print("==================================================")
+    print("SGA-DO: SISTEMA DIPLOMADOSONLINE")
+    print("==================================================")
+    print("1. Registrar Alumno")
+    print("2. Registrar Profesor")
+    print("3. Registrar Notas a un Alumno")
+    print("4. Deshacer Último Registro de Nota")
+    print("5. Generar Cola de Certificados")
+    print("6. Mostrar Reporte General")
+    print("7. Salir")
+    print("==================================================")
 
 sistema = SistemaAcademico()
-sistema.registrar_alumno(alumno1)
-sistema.registrar_profesor(profesor1)
-aprobados = sistema.revisar_aprobados()
-print("cantidad de aprobados:", len(aprobados))
-sistema.registrar_nota(18)
-sistema.registrar_nota(12)
-print("pila de notas:", sistema.pila_notas)
-print("nota eliminada:", sistema.deshacer_ultima_nota())
-certificados = sistema.generar_certificados()
-print("certificados:", certificados)
-sistema.mostrar_reporte()
-sistema.guardar_datos_txt()
-sistema.alumnos = []
-sistema.cargar_datos_txt()
+sistema.cargar_alumnos_txt()
+sistema.cargar_profesores_txt()
 
-print("ALUMNOS CARGADOS DESDE TXT:")
-for alumno in sistema.alumnos:
-    alumno.mostrar_datos()
-sistema.salir()
+while True:
+    mostrar_menu()
+    opcion = input("Seleccione una opción: ")
+    
+    if opcion not in ["1", "2", "3", "4", "5", "6", "7"]:
+        print("Error: ingrese una opción válida del 1 al 7.")
+        continue
+    
+    if opcion == "7":
+        sistema.salir()
+        break
+
+    if opcion == "1":
+        cedula = input("Cédula: ")
+        nombre = input("Nombre completo: ")
+        correo = input("Correo: ")
+        tipo_programa = input("Tipo de programa: ")
+
+        if tipo_programa.lower() == "curso":
+            programa = Curso("curso")
+        elif tipo_programa.lower() == "diplomado":
+            programa = Diplomado("diplomado")
+        elif tipo_programa.lower() == "bootcamp":
+            programa = Bootcamp("bootcamp")
+        else:
+            print("Error: el programa debe ser Curso, Diplomado o Bootcamp.")
+            continue
+        
+        if sistema.buscar_alumno(cedula) is not None:
+            print("Ya existe un alumno con esa cédula.")
+        else:
+            alumno = Alumno(cedula, nombre, correo, [], programa)
+            sistema.registrar_alumno(alumno)
+            sistema.guardar_alumno_txt(alumno)
+            print("Alumno registrado correctamente.")
+
+    if opcion == "2":
+        cedula = input("Cédula: ")
+        nombre = input("Nombre completo: ")
+        correo = input("Correo: ")
+        especialidad = input("Especialidad: ")
+        materia = input("Materia asignada: ")
+
+        
+        if sistema.buscar_profesor(cedula) is not None:
+            print("Ya existe un profesor con esa cédula.")
+        else:
+            profesor = Profesor(cedula, nombre, correo, especialidad, materia)
+            sistema.registrar_profesor(profesor)
+            sistema.guardar_profesor_txt(profesor)
+            print("Profesor registrado correctamente.")
+
+    if opcion == "3":
+        cedula = input("Cédula del alumno: ")
+        alumno = sistema.buscar_alumno(cedula)
+
+        if alumno is None:
+            print("Alumno no encontrado.")
+        else:
+            print("Alumno encontrado:", alumno.nombre_completo)
+
+            if len(alumno.notas) >= 3:
+                print("El alumno ya tiene las 3 notas permitidas.")
+            else:
+                try:
+                    nota = float(input("Ingrese la nota: "))
+
+                    if nota < 1 or nota > 20:
+                        print("Error: la nota debe estar entre 1 y 20.")
+                    else:
+                        alumno.registrar_nota(nota)
+                        sistema.registrar_nota(alumno, nota)
+                        sistema.actualizar_alumnos_txt()
+                        print("Nota registrada correctamente.")
+
+                except ValueError:
+                    print("Error: debes ingresar un número válido.")
+
+    if opcion == "4":
+        nota_eliminada = sistema.deshacer_ultima_nota()
+
+        if nota_eliminada is None:
+            print("No hay notas para deshacer.")
+        else:
+            print("Nota eliminada:", nota_eliminada)
+        if nota_eliminada is not None:
+            sistema.actualizar_alumnos_txt()
+
+    if opcion == "5":
+        sistema.generar_certificados()
+        sistema.guardar_certificados_txt()
+        print("Certificados generados correctamente.")
+    
+    if opcion == "6":
+        sistema.mostrar_reporte()
+           
+        

@@ -1,0 +1,7 @@
+123,maximo saravia,maximo@gmail.com,curso,10.0,10.0,10.0
+456,angel saravia,angel@gmail.com,diplomado,14.0,14.0,13.0
+789,leoncia sanchez,leoncia@gmail.com,Bootcamp,20.0,20.0,13.0
+987,juan jose,juan@gmail.com,curso,10.0,10.0,10.0
+261,marcelo alejandro,marcelo@gmail.com,bootcamp,15.0,18.0,14.0
+26112,anne jeria,anne@gmail.com,diplomado,14.0,16.0,15.0
+26112666,Joan Garcia,joan@gmail.com,curso,10.0,15.0,0
