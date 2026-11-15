@@ -232,7 +232,7 @@ class SistemaAcademico:
         with open("certificados_pendientes.txt", "w", encoding="utf-8") as archivo:
             archivo.write("REPORTE DE CERTIFICADOS\n")
             archivo.write("==============================\n")
-            archivo.write("Total de graduandos: " + str(len(self.cola_certificados)) + "\n\n")
+            archivo.write("Total de gaduandos: " + str(len(self.cola_certificados)) + "\n\n")
 
             for alumno in self.cola_certificados:
                 archivo.write("Cedula: " + alumno.cedula + "\n")

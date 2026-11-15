@@ -1,3 +1,1 @@
-246408610,Mario Castañeda,mariocastañeda@gmail.com,profesor,phyton
-279958950,carlos pinto,carlos@gmail.com,profesor,phyton
-
+261,mauricio,mauricio,phyton,matematicas
