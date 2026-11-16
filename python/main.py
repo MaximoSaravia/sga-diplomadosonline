@@ -56,30 +56,30 @@ class Curso(ProgramaAcademico):
         super().__init__(nombre_programa)
         self.promedio_minimo = 10
     def evaluar_aprobacion(self, notas):
-        if len(notas) == 0:
+        if len(notas) != 3:
             return False
-        return sum(notas) / len(notas) >= self.promedio_minimo
 
+        return sum(notas) / len(notas) >= self.promedio_minimo
 
 class Diplomado(ProgramaAcademico):
     def __init__(self, nombre_programa):
         super().__init__(nombre_programa)
         self.promedio_minimo = 14
     def evaluar_aprobacion(self, notas):
-        if len(notas) == 0:
+        if len(notas) != 3:
             return False
-        return sum(notas) / len(notas) >= self.promedio_minimo
 
+        return sum(notas) / len(notas) >= self.promedio_minimo
 
 class Bootcamp(ProgramaAcademico):
     def __init__(self, nombre_programa):
         super().__init__(nombre_programa)
         self.nota_minima_individual = 14
     def evaluar_aprobacion(self, notas):
-        if len(notas) == 0:
+        if len(notas) != 3:
             return False
-        return all(nota >= self.nota_minima_individual for nota in notas)
 
+        return all(nota >= self.nota_minima_individual for nota in notas)
 
 
 
